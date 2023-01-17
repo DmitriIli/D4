@@ -1,0 +1,53 @@
+{% extends 'default.html' %}
+
+{% load custom_filters %}
+
+{% block title %}
+    <hr>
+    <h>Статьи</h>
+{% endblock title %}
+
+{% block content %}
+
+    <form action="" method="get">
+    {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
+    {{ filterset.form.as_p }}
+    {# Добавим кнопку отправки данных формы #}
+    <input type="submit" value="Найти"/>
+    </form>
+
+    {% if posts %}
+        {% for item in posts %}
+            {% if item.type == 'NW' %}
+                <a class="nav-link" aria-current="page" href=news/{{item.id}}> {{ item.title|currency }}</a>
+
+            {% else %}
+                <a class="nav-link" aria-current="page" href=articles/{{item.id}}> {{ item.title|currency }}</a>
+            {% endif%}
+            {{ item.date_time }}
+            {{ item.text|truncatewords:2|censor }}
+            <hr>
+        {% endfor%}
+    {% endif%}
+    <a class="navbar-brand" href="/news/create/">Добавить новость</a>
+    <a class="navbar-brand" href="/articles/create/">Добавить статью</a>
+
+
+<hr>
+{% if page_obj.has_previous and page_obj.previous_page_number != 1 %}
+    <a href="?page=1">{{1}}</a>
+    <a href="?page={{page_obj.previous_page_number}}">{{page_obj.previous_page_number}}</a>
+{% elif page_obj.previous_page_number == 1 %}
+    <a href="?page=1">{{1}}</a>
+{% endif%}
+
+{{page_obj.number}}
+
+{% if page_obj.has_next and page_obj.next_page_number != page_obj.paginator.num_pages %}
+    <a href="?page={{page_obj.next_page_number}}">{{page_obj.next_page_number}}</a>
+    <a href="?page={{page_obj.paginator.num_pages}}">{{page_obj.paginator.num_pages}}</a>
+{% elif page_obj.next_page_number == page_obj.paginator.num_pages %}
+    <a href="?page={{page_obj.paginator.num_pages}}">{{page_obj.paginator.num_pages}}</a>
+{% endif%}
+
+{% endblock content %}

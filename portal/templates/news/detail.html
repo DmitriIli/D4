@@ -1,0 +1,20 @@
+{% extends 'default.html' %}
+{% load custom_filters %}
+
+{% block title %}
+    <hr>
+{% endblock title %}
+
+{% block content %}
+
+    {% if item %}
+        {{item.type}}
+        {{ item.title|currency }}
+        {{ item.date_time }}
+        {{ item.text|censor  }}
+    <hr>
+    <a class="nav-link" href="edit/">Редактировать</a>
+    <a class="nav-link" href="delete/">Удалить</a>
+
+    {% endif%}
+{% endblock content %}
