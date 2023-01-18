@@ -7,4 +7,6 @@ urlpatterns = [
     path('pages/', include('django.contrib.flatpages.urls')),
     path('', include('news.urls')),
     path('', NewsList.as_view(), name='news'),
+    path('sign/', include('sign.urls')),
+    path('', include('protect.urls'))
 ]

@@ -14,6 +14,7 @@ class NewsList(ListView):
     ordering = '-date_time'
     paginate_by = 2
 
+
     # Переопределяем функцию получения списка товаров
     def get_queryset(self):
         # Получаем обычный запрос
@@ -30,6 +31,7 @@ class NewsList(ListView):
         context = super().get_context_data(**kwargs)
         # Добавляем в контекст объект фильтрации.
         context['filterset'] = self.filterset
+        print(self.request.user)
         return context
 
 
