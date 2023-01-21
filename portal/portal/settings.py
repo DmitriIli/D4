@@ -144,6 +144,7 @@ STATICFILES_DIRS = [
 
 LOGIN_URL = 'sign/login/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # LOGIN_URL = '/accounts/login/'
 #for allauth

@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path, include
-from .views import *
+from .views import BaseRegisterView, make_author
 
 urlpatterns = [
     path('login/',
@@ -12,4 +12,5 @@ urlpatterns = [
     path('signup/',
          BaseRegisterView.as_view(template_name='sign/signup.html'),
          name='signup'),
+    path('upgrade/', make_author, name='make_authors'),
 ]
