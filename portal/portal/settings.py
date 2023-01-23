@@ -148,3 +148,5 @@ LOGOUT_REDIRECT_URL = '/'
 
 # LOGIN_URL = '/accounts/login/'
 #for allauth
+
+ACCOUNT_FORMS = {'signup': 'sign.models.BasicSignupForm'}

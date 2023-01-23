@@ -9,7 +9,7 @@ from .forms import BaseRegisterForm
 class BaseRegisterView(CreateView):
     model = User
     form_class = BaseRegisterForm
-    success_url = '/'
+    success_url = '/sign/login/'
 
 
 @login_required
