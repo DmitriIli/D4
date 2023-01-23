@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from django.contrib.auth.models import User, Group
+from news.models import Author
 from django.views.generic.edit import CreateView
 from .forms import BaseRegisterForm
 
@@ -18,4 +19,6 @@ def make_author(request):
     author_group = Group.objects.get(name='authors')
     if not request.user.groups.filter(name='authors').exists():
         author_group.user_set.add(user)
+        author = Author(author=user)
+        author.save()
     return redirect('/')

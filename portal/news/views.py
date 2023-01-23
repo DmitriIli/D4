@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.shortcuts import get_object_or_404
 from .forms import CreatePost
 from .filters import NewsFilter
-
+from django.contrib.auth.models import Group
 
 class NewsList(ListView):
     model = Post
@@ -54,13 +54,30 @@ class DeteilNews(DetailView):
 class CreateNews(CreateView):
     model = Post
     template_name = 'news/create.html'
-    form_class = CreatePost
+    # form_class = CreatePost
+    context_object_name = 'news'
+    fields = [
+        'title',
+        'text',
+        'category'
+    ]
     success_url = '/'
+
 
     def form_valid(self, form):
         post = form.save(commit=False)
         post.type = 'NW'
+        context = self.get_context_data()
+        if context['is_author']:
+            post.author = self.request.user
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_author'] = self.request.user.groups.filter(name='authors').exists()
+        return context
+
+
 
 
 class CreateArticle(CreateView):
@@ -68,6 +85,12 @@ class CreateArticle(CreateView):
     template_name = 'news/create.html'
     form_class = CreatePost
     success_url = '/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_author'] = self.request.user.groups.filter(name='authors').exists()
+        return context
+
 
     def form_valid(self, form):
         post = form.save(commit=False)

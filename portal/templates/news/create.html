@@ -1,8 +1,10 @@
 {% extends 'default.html' %}
 
 {% block content %}
-{{ request.path }}
-
+<br>
+{% if is_author %}
+    {{ request.user }}
+{% endif %}
 <form method="post">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Save">
