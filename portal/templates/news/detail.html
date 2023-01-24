@@ -8,11 +8,20 @@
 {% block content %}
 
     {% if item %}
+        {{item.author}}
+        <br>
         {{item.type}}
+        <br>
         {{ item.title|currency }}
+        <br>
         {{ item.date_time }}
+        <br>
         {{ item.text|censor  }}
     <hr>
+    {% if request.user == item.author %}
+        {{request.user}}
+    {% endif %}
+    {{request.user}}
     <a class="nav-link" href="edit/">Редактировать</a>
     <a class="nav-link" href="delete/">Удалить</a>
 

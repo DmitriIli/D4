@@ -5,7 +5,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.shortcuts import get_object_or_404
 from .forms import CreatePost
 from .filters import NewsFilter
-from django.contrib.auth.models import Group
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+
 
 class NewsList(ListView):
     model = Post
@@ -13,7 +14,6 @@ class NewsList(ListView):
     template_name = 'news/news.html'
     ordering = '-date_time'
     paginate_by = 2
-
 
     # Переопределяем функцию получения списка товаров
     def get_queryset(self):
@@ -35,7 +35,7 @@ class NewsList(ListView):
         return context
 
 
-class DeteilNews(DetailView):
+class DetailNews(DetailView):
     model = Post
     context_object_name = 'item'
     template_name = 'news/detail.html'
@@ -51,67 +51,49 @@ class DeteilNews(DetailView):
     # news = get_object_or_404(Post, pk=self.kwargs.get('pk'))
 
 
-class CreateNews(CreateView):
+class CreateNews(PermissionRequiredMixin, CreateView):
     model = Post
     template_name = 'news/create.html'
-    # form_class = CreatePost
-    context_object_name = 'news'
-    fields = [
-        'title',
-        'text',
-        'category'
-    ]
+    form_class = CreatePost
+    permission_required = ('news.add_post')
     success_url = '/'
-
 
     def form_valid(self, form):
         post = form.save(commit=False)
         post.type = 'NW'
-        context = self.get_context_data()
-        if context['is_author']:
-            post.author = self.request.user
+        post.author = Author.objects.get(author_id=self.request.user.pk)
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_author'] = self.request.user.groups.filter(name='authors').exists()
-        return context
 
-
-
-
-class CreateArticle(CreateView):
+class CreateArticle(PermissionRequiredMixin, CreateView):
     model = Post
     template_name = 'news/create.html'
     form_class = CreatePost
+    permission_required = ('news.add_post')
     success_url = '/'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_author'] = self.request.user.groups.filter(name='authors').exists()
-        return context
-
 
     def form_valid(self, form):
         post = form.save(commit=False)
         post.type = 'AT'
+        post.author = Author.objects.get(author_id=self.request.user.pk)
         return super().form_valid(form)
 
 
-class EditNews(UpdateView):
+class EditNews(PermissionRequiredMixin, UpdateView):
     model = Post
     template_name = 'news/create.html'
+    permission_required = ('news.change_post')
     fields = [
-        'author',
         'title',
         'text',
         'category'
     ]
 
 
-class DeleteNews(DeleteView):
+class DeleteNews(PermissionRequiredMixin, DeleteView):
     model = Post
     success_url = reverse_lazy('news')
+    permission_required = ('news.delete_post')
     template_name = 'news/delete.html'
 
     def get(self, request, *args, **kwargs):
