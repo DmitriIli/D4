@@ -31,7 +31,6 @@ class NewsList(ListView):
         context = super().get_context_data(**kwargs)
         # Добавляем в контекст объект фильтрации.
         context['filterset'] = self.filterset
-        print(self.request.user)
         return context
 
 
@@ -40,13 +39,19 @@ class DetailNews(DetailView):
     context_object_name = 'item'
     template_name = 'news/detail.html'
 
-    def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except Http404:
-            return redirect('news')
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_is_author'] = True if self.get_object().author.id == self.request.user.id else False
+        context['123'] = 123
+        return context
+
+    # def get(self, request, *args, **kwargs):
+    #     try:
+    #         self.object = self.get_object()
+    #     except Http404:
+    #         return redirect('news')
+    #     context = self.get_context_data(object=self.object)
+    #     return self.render_to_response(context)
 
     # news = get_object_or_404(Post, pk=self.kwargs.get('pk'))
 

@@ -6,7 +6,6 @@
 {% endblock title %}
 
 {% block content %}
-
     {% if item %}
         {{item.author}}
         <br>
@@ -18,12 +17,12 @@
         <br>
         {{ item.text|censor  }}
     <hr>
-    {% if request.user == item.author %}
-        {{request.user}}
+    {% if user_is_author %}
+        <a class="nav-link" href="edit/">Редактировать</a>
+        <a class="nav-link" href="delete/">Удалить</a>
     {% endif %}
-    {{request.user}}
-    <a class="nav-link" href="edit/">Редактировать</a>
-    <a class="nav-link" href="delete/">Удалить</a>
+    request user - {{request.user}}
+
 
     {% endif%}
 {% endblock content %}
