@@ -2,27 +2,43 @@
 {% load custom_filters %}
 
 {% block title %}
-    <hr>
+<hr>
 {% endblock title %}
 
+
 {% block content %}
-    {% if item %}
-        {{item.author}}
-        <br>
-        {{item.type}}
-        <br>
-        {{ item.title|currency }}
-        <br>
-        {{ item.date_time }}
-        <br>
-        {{ item.text|censor  }}
-    <hr>
-    {% if user_is_author %}
-        <a class="nav-link" href="edit/">Редактировать</a>
-        <a class="nav-link" href="delete/">Удалить</a>
-    {% endif %}
-    request user - {{request.user}}
 
 
-    {% endif%}
+{% if item %}
+{{item.author}}
+<br>
+{{item.type}}
+<br>
+{{ item.title|currency }}
+<br>
+{{ item.date_time }}
+<br>
+{{ item.text|censor  }}
+<br>
+
+<hr>
+{% if user_is_author %}
+<a class="nav-link" href="edit/">Редактировать</a>
+<a class="nav-link" href="delete/">Удалить</a>
+{% endif %}
+{% if request.user.is_authenticated %}
+{% if category %}
+<hr>
+
+email subscription
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for item in category %}
+    <input type="submit" value={{item}} name={{item}}>
+    {% endfor %}
+</form>
+<br>
+{% endif %}
+{% endif %}
+{% endif%}
 {% endblock content %}

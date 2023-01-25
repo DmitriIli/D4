@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.http import Http404, request
 from django.shortcuts import render, redirect
 from .models import *
@@ -13,7 +14,7 @@ class NewsList(ListView):
     context_object_name = 'posts'
     template_name = 'news/news.html'
     ordering = '-date_time'
-    paginate_by = 2
+    paginate_by = 10
 
     # Переопределяем функцию получения списка товаров
     def get_queryset(self):
@@ -41,9 +42,45 @@ class DetailNews(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user_is_author'] = True if self.get_object().author.id == self.request.user.id else False
-        context['123'] = 123
+        if self.request.user.is_authenticated:
+            context['user_is_author'] = True if self.get_object().author.author.id == self.request.user.id else False
+            user = self.request.user
+            post = self.kwargs.get('pk')
+            category_list = [i.name for i in Post.objects.get(pk=post).category.all()]
+            user_category = User.objects.get(pk=user.id).subscribers_set.all()
+            category_sub = [i.category.name for i in user_category]
+            context['category'] = list(set(category_list).difference(set(category_sub)))
         return context
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        post = self.kwargs.get('pk')
+
+        if user.is_authenticated:
+            category_list = [i.name for i in Post.objects.get(pk=post).category.all()]
+            user_category = User.objects.get(pk=user.id).subscribers_set.all()
+            category_sub = [i.category.name for i in user_category]
+            sub_cat = list(set(category_list).difference(set(category_sub)))
+        if request.POST:
+            for item in sub_cat:
+                if item in request.POST:
+                    cat_id = Category.objects.get(name__iexact=f'{item}')
+                    subscriber = Subscribers(
+                        user=user,
+                        category=cat_id
+                    )
+                    subscriber.save()
+                    break
+
+        send_mail(
+            subject=f'{self.request.user} mail sending',
+            message='appointment.message',
+            from_email='softb0x@yandex.ru',
+            recipient_list=['di.grebenev@yandex.ru']
+        )
+
+        return redirect('/')
+
 
     # def get(self, request, *args, **kwargs):
     #     try:
@@ -99,81 +136,6 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
     model = Post
     success_url = reverse_lazy('news')
     permission_required = ('news.delete_post')
-    template_name = 'news/delete.html'
-
-    def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except Http404:
-            return redirect('news')
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
-
-    class CreateNews(CreateView):
-        model = Post
-
-        # form_class = CreateForm
-        # initial = {'': '0'}
-        template_name = 'news/create.html'
-        fields = [
-            'author',
-            'title',
-            'text',
-            'category'
-        ]
-
-    class EditNews(UpdateView):
-        model = Post
-        template_name = 'news/create.html'
-        fields = [
-            'author',
-            'title',
-            'text',
-            'category'
-        ]
-
-    class DeleteNews(DeleteView):
-        model = Post
-        success_url = reverse_lazy('news')
-        template_name = 'news/delete.html'
-
-        def get(self, request, *args, **kwargs):
-            try:
-                self.object = self.get_object()
-            except Http404:
-                return redirect('news')
-            context = self.get_context_data(object=self.object)
-            return self.render_to_response(context)
-
-
-class CreateArticle(CreateView):
-    model = Post
-
-    # form_class = CreateForm
-    # initial = {'': '0'}
-    template_name = 'news/create.html'
-    fields = [
-        'author',
-        'title',
-        'text',
-        'category'
-    ]
-
-
-class EditArticle(UpdateView):
-    model = Post
-    template_name = 'news/create.html'
-    fields = [
-        'author',
-        'title',
-        'text',
-        'category'
-    ]
-
-
-class DeleteArticle(DeleteView):
-    model = Post
-    success_url = reverse_lazy('')
     template_name = 'news/delete.html'
 
     def get(self, request, *args, **kwargs):
