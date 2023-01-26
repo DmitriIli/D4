@@ -81,7 +81,6 @@ class DetailNews(DetailView):
 
         return redirect('/')
 
-
     # def get(self, request, *args, **kwargs):
     #     try:
     #         self.object = self.get_object()
@@ -105,6 +104,27 @@ class CreateNews(PermissionRequiredMixin, CreateView):
         post.type = 'NW'
         post.author = Author.objects.get(author_id=self.request.user.pk)
         return super().form_valid(form)
+
+    def post(self, request, *args, **kwargs):
+        post = self.kwargs.get('pk')
+        send_mail(
+            subject=f'{self.request.user} mail sending',
+            message='appointment.message',
+            from_email='softb0x@yandex.ru',
+            recipient_list=['di.grebenev@yandex.ru']
+        )
+        form = CreatePost(request.POST)
+        if form.is_valid():
+            categories = list(form.cleaned_data['category'])
+
+        print(categories, categories[0])
+        category_list = [item for item in categories]
+        print(category_list)
+        recipient_list = []
+        # recipient_list.append([])
+        users = User.objects.all()
+
+        return redirect('/')
 
 
 class CreateArticle(PermissionRequiredMixin, CreateView):
