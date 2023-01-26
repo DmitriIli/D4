@@ -107,23 +107,29 @@ class CreateNews(PermissionRequiredMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
         post = self.kwargs.get('pk')
-        send_mail(
-            subject=f'{self.request.user} mail sending',
-            message='appointment.message',
-            from_email='softb0x@yandex.ru',
-            recipient_list=['di.grebenev@yandex.ru']
-        )
+
         form = CreatePost(request.POST)
         if form.is_valid():
             categories = list(form.cleaned_data['category'])
 
-        print(categories, categories[0])
         category_list = [item for item in categories]
-        print(category_list)
         recipient_list = []
-        # recipient_list.append([])
-        users = User.objects.all()
-
+        # post = Post.objects.get(pk=post_pk)
+        # category_list = [i for i in Post.objects.get(pk=post_pk).post_category.all()]
+        for item in category_list:
+            sub = Subscribers.objects.filter(category_id=item).all()
+            if sub:
+                for user in sub:
+                    recipient_list.append(User.objects.get(pk=user.user_id).email)
+        email_list = list(set(recipient_list))
+        email_list = [item for item in email_list if item]
+        print(email_list)
+        send_mail(
+            subject=f'{self.request.user} mail sending',
+            message='appointment.message',
+            from_email='softb0x@yandex.ru',
+            recipient_list=email_list
+        )
         return redirect('/')
 
 
