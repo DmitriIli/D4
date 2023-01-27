@@ -55,7 +55,6 @@ class DetailNews(DetailView):
     def post(self, request, *args, **kwargs):
         user = request.user
         post = self.kwargs.get('pk')
-
         if user.is_authenticated:
             category_list = [i.name for i in Post.objects.get(pk=post).category.all()]
             user_category = User.objects.get(pk=user.id).subscribers_set.all()
