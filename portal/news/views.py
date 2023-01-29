@@ -70,14 +70,6 @@ class DetailNews(DetailView):
                     )
                     subscriber.save()
                     break
-
-        send_mail(
-            subject=f'{self.request.user} mail sending',
-            message='appointment.message',
-            from_email='softb0x@yandex.ru',
-            recipient_list=['di.grebenev@yandex.ru']
-        )
-
         return redirect('/')
 
     # def get(self, request, *args, **kwargs):
@@ -104,32 +96,6 @@ class CreateNews(PermissionRequiredMixin, CreateView):
         post.author = Author.objects.get(author_id=self.request.user.pk)
         return super().form_valid(form)
 
-    def post(self, request, *args, **kwargs):
-        post = self.kwargs.get('pk')
-
-        form = CreatePost(request.POST)
-        if form.is_valid():
-            categories = list(form.cleaned_data['category'])
-
-        category_list = [item for item in categories]
-        recipient_list = []
-        # post = Post.objects.get(pk=post_pk)
-        # category_list = [i for i in Post.objects.get(pk=post_pk).post_category.all()]
-        for item in category_list:
-            sub = Subscribers.objects.filter(category_id=item).all()
-            if sub:
-                for user in sub:
-                    recipient_list.append(User.objects.get(pk=user.user_id).email)
-        email_list = list(set(recipient_list))
-        email_list = [item for item in email_list if item]
-        print(email_list)
-        send_mail(
-            subject=f'{self.request.user} mail sending',
-            message='appointment.message',
-            from_email='softb0x@yandex.ru',
-            recipient_list=email_list
-        )
-        return redirect('/')
 
 
 class CreateArticle(PermissionRequiredMixin, CreateView):

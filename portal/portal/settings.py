@@ -39,13 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
     'fpages',
-    'news',
+    # 'news',
+    'news.apps.NewsConfig',
     'django_filters',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # ... include the providers you want to enable:
     'allauth.socialaccount.providers.google',
+
 ]
 
 MIDDLEWARE = [
@@ -147,7 +148,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # LOGIN_URL = '/accounts/login/'
-#for allauth
+# for allauth
 
 ACCOUNT_FORMS = {'signup': 'sign.models.BasicSignupForm'}
 
