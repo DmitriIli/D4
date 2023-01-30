@@ -12,6 +12,7 @@ from .models import Post, Subscribers
 def subscribers_notify(sender, instance, created, **kwarg):
     recipient_list = []
     categories = [i for i in Post.objects.get(pk=instance.id).category.all()]
+    print(categories)
     for item in categories:
         subscribers = Subscribers.objects.filter(category_id=item).all()
         if subscribers:
@@ -19,6 +20,7 @@ def subscribers_notify(sender, instance, created, **kwarg):
                 recipient_list.append(User.objects.get(pk=i.user_id).email)
     email_list = list(set(recipient_list))
     email_list = [item for item in email_list if item]
+    print(email_list)
     if created:
         html_content = render_to_string(
             'news/notify.html',

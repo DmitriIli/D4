@@ -77,13 +77,14 @@ TEMPLATES = [
         },
     },
 ]
+EMAIL_HOST_USER = 'softb0x'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER + '@yandex.ru'
 
 AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
 
-    # `allauth` specific authentication methods, such as login by e-mail
+    'django.contrib.auth.backends.ModelBackend',  # Needed to login by username in Django admin, regardless of `allauth`
     'allauth.account.auth_backends.AuthenticationBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
 ]
 
 WSGI_APPLICATION = 'portal.wsgi.application'
@@ -157,3 +158,7 @@ EMAIL_PORT = 465  # порт smtp сервера
 EMAIL_HOST_USER = 'softb0x'  # user name
 EMAIL_HOST_PASSWORD = 'rmcarqqzwhtjncbd'
 EMAIL_USE_SSL = True  # Яндекс использует ssl
+
+ACCOUNT_EMAIL_VRIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTIFICATION_METHOD = 'email'
