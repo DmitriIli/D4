@@ -11,8 +11,8 @@ from .models import Post, Subscribers
 @receiver(post_save, sender=Post)# подключение сигналов с использованием декоратора
 def subscribers_notify(sender, instance, created, **kwarg):
     recipient_list = []
+
     categories = [i for i in Post.objects.get(pk=instance.id).category.all()]
-    print(categories)
     for item in categories:
         subscribers = Subscribers.objects.filter(category_id=item).all()
         if subscribers:
@@ -20,8 +20,8 @@ def subscribers_notify(sender, instance, created, **kwarg):
                 recipient_list.append(User.objects.get(pk=i.user_id).email)
     email_list = list(set(recipient_list))
     email_list = [item for item in email_list if item]
-    print(email_list)
     if created:
+        print('created')
         html_content = render_to_string(
             'news/notify.html',
             {
@@ -38,6 +38,24 @@ def subscribers_notify(sender, instance, created, **kwarg):
 
         msg.send()  # отсылаем
         print(email_list)
+
+        return redirect('/')
+    else:
+        html_content = render_to_string(
+            'news/notify.html',
+            {
+                'instance': instance,
+            }
+        )
+        msg = EmailMultiAlternatives(
+            subject=f'изменения в {instance.title} {instance.date_time.strftime("%Y-%M-%d")}',
+            body=f'{instance.text[:20]}  http://127.0.0.1:8000/news/{instance.id}',
+            from_email='softb0x@yandex.ru',
+            to=email_list,
+        )
+        msg.attach_alternative(html_content, "text/html")  # добавляем html
+
+        msg.send()  # отсылаем
 
         return redirect('/')
 
