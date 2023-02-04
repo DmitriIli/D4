@@ -10,5 +10,5 @@ class CreatePost(forms.ModelForm):
         fields = [
             'title',
             'text',
-            'category'
+            'categories'
         ]

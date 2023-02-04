@@ -1,4 +1,5 @@
-from django.core.mail import send_mail
+from datetime import timedelta
+
 from django.http import Http404, request
 from django.shortcuts import render, redirect
 from .models import *
@@ -7,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from .forms import CreatePost
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from .task import hello
 
 
 class NewsList(ListView):
@@ -32,6 +34,7 @@ class NewsList(ListView):
         context = super().get_context_data(**kwargs)
         # Добавляем в контекст объект фильтрации.
         context['filterset'] = self.filterset
+        hello.delay()
         return context
 
 
@@ -42,11 +45,12 @@ class DetailNews(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         if self.request.user.is_authenticated:
             context['user_is_author'] = True if self.get_object().author.author.id == self.request.user.id else False
             user = self.request.user
             post = self.kwargs.get('pk')
-            category_list = [i.name for i in Post.objects.get(pk=post).category.all()]
+            category_list = [i.name for i in Post.objects.get(pk=post).categories.all()]
             user_category = User.objects.get(pk=user.id).subscribers_set.all()
             category_sub = [i.category.name for i in user_category]
             context['category'] = list(set(category_list).difference(set(category_sub)))
@@ -56,7 +60,7 @@ class DetailNews(DetailView):
         user = request.user
         post = self.kwargs.get('pk')
         if user.is_authenticated:
-            category_list = [i.name for i in Post.objects.get(pk=post).category.all()]
+            category_list = [i.name for i in Post.objects.get(pk=post).categories.all()]
             user_category = User.objects.get(pk=user.id).subscribers_set.all()
             category_sub = [i.category.name for i in user_category]
             sub_cat = list(set(category_list).difference(set(category_sub)))
@@ -97,7 +101,6 @@ class CreateNews(PermissionRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-
 class CreateArticle(PermissionRequiredMixin, CreateView):
     model = Post
     template_name = 'news/create.html'
@@ -119,7 +122,7 @@ class EditNews(PermissionRequiredMixin, UpdateView):
     fields = [
         'title',
         'text',
-        'category'
+        'categories'
     ]
 
 

@@ -1,18 +1,18 @@
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.mail import mail_managers, send_mail, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
-
+import time
 from .models import Post, Subscribers
 
 
-@receiver(post_save, sender=Post)# подключение сигналов с использованием декоратора
+@receiver(post_save, sender=Post)  # подключение сигналов с использованием декоратора
 def subscribers_notify(sender, instance, created, **kwarg):
-    recipient_list = []
 
-    categories = [i for i in Post.objects.get(pk=instance.id).category.all()]
+    recipient_list = []
+    categories = [i for i in Post.objects.get(pk=instance.id).categories.all()]
     for item in categories:
         subscribers = Subscribers.objects.filter(category_id=item).all()
         if subscribers:
@@ -59,4 +59,30 @@ def subscribers_notify(sender, instance, created, **kwarg):
 
         return redirect('/')
 
+
 # post_save.connect(mail_sender, sender=Post) # подключение сигналов
+
+@receiver(post_save, sender=User)
+def adduser_message(sender, instance, created, **kwarg):
+    if created:
+        if instance.email:
+            email_list = []
+            email_list.append(str(instance.email))
+            html_content = render_to_string(
+                'news/notify.html',
+                {
+                    'instance': instance,
+                }
+            )
+
+            msg = EmailMultiAlternatives(
+                subject=f'Приветсвую тебя {instance.username}',
+                body=f'Приветсвенное письмо для нового пользователя {instance.username}',
+                from_email='softb0x@yandex.ru',
+                to=email_list,
+            )
+            msg.attach_alternative(html_content, "text/html")  # добавляем html
+
+            msg.send()  # отсылаем
+
+        return redirect('/')

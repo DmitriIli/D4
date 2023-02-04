@@ -34,16 +34,17 @@ class Category(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+
 class Subscribers(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
-class Post(models.Model):
 
+class Post(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     type = models.CharField(max_length=2, default='AT')
     date_time = models.DateTimeField(auto_now=True)
-    category = models.ManyToManyField(Category)
+    categories = models.ManyToManyField(Category, through='PostCategory')
     title = models.CharField(max_length=64, default=f'статья от {datetime.now()}')
     text = models.TextField(default='содердание статьи')
     rating = models.SmallIntegerField(default=0)
@@ -66,7 +67,6 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse_lazy('news')
-
 
 
 class PostCategory(models.Model):
