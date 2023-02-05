@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from datetime import datetime
 from django.urls import reverse, reverse_lazy
+from django.core.cache import cache
+
 
 
 class Author(models.Model):
@@ -66,8 +68,11 @@ class Post(models.Model):
         return f'{self.text[:123]}...'
 
     def get_absolute_url(self):
-        return reverse_lazy('news')
-
+        return f'/news/{self.id}' if self.type == 'NW' else f'/aricles/{self.id}'
+           
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete(f'post-{self.pk}')
 
 class PostCategory(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)

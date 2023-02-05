@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from .forms import CreatePost
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.core.cache import cache
 
 
 class NewsList(ListView):
@@ -36,6 +37,8 @@ class NewsList(ListView):
         return context
 
 
+
+
 class DetailNews(DetailView):
     model = Post
     context_object_name = 'item'
@@ -44,8 +47,6 @@ class DetailNews(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # post = Post.objects.get(pk=self.kwargs.get('pk'))
-        # categories = post.postcategory_set.all()
         
         if self.request.user.is_authenticated:
             context['user_is_author'] = True if self.get_object().author.author.id == self.request.user.id else False
@@ -77,6 +78,15 @@ class DetailNews(DetailView):
                     break
         return redirect('/')
 
+    def get_object(self,*args, **kwargs) -> models.Model:
+        obj = cache.get(f'post-{self.kwargs["pk"]}', None)
+
+        if not obj:
+            obj =  super().get_object(queryset=self.queryset)
+            cache.set(f'post-{self.kwargs["pk"]}', obj)
+        
+        return obj
+    
     # def get(self, request, *args, **kwargs):
     #     try:
     #         self.object = self.get_object()
@@ -84,7 +94,6 @@ class DetailNews(DetailView):
     #         return redirect('news')
     #     context = self.get_context_data(object=self.object)
     #     return self.render_to_response(context)
-
     # news = get_object_or_404(Post, pk=self.kwargs.get('pk'))
 
 
