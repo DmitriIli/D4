@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 from .forms import CreatePost
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
-from .task import hello
 
 
 class NewsList(ListView):
@@ -34,7 +33,6 @@ class NewsList(ListView):
         context = super().get_context_data(**kwargs)
         # Добавляем в контекст объект фильтрации.
         context['filterset'] = self.filterset
-        hello.delay()
         return context
 
 
@@ -45,7 +43,10 @@ class DetailNews(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        
+        # post = Post.objects.get(pk=self.kwargs.get('pk'))
+        # categories = post.postcategory_set.all()
+        
         if self.request.user.is_authenticated:
             context['user_is_author'] = True if self.get_object().author.author.id == self.request.user.id else False
             user = self.request.user
