@@ -12,7 +12,7 @@
     <link href="{% static 'css/styles.css' %}" rel="stylesheet"/>
 </head>
 <body>
-
+{% load i18n %}
 {% load cache %}
 {% cache 60 menubar request.user.username %}
 <!-- Responsive navbar-->
@@ -29,6 +29,22 @@
                 {% else %}
                     <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'login' %}">Войти</a></li>
                 {% endif %}
+
+                <form action="{% url 'set_language' %}" method="POST"> 
+                    {% csrf_token %}
+                    <input type="hidden" name="text" value="{{ redirect_to }}">
+                    <select name="language" id="">
+                        {% get_available_lenguages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+
+                        {% for language in languages %}
+                            <option value="{{language.coge}}" {% if language.code == LANGUAGE_CODE %} selected {% endid %} >
+                                {{ language.name_local }} - {{ language.code }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="set">
+                </form>
                 <!-- dropdown menu
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
