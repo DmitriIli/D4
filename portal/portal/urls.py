@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from news.views import NewsList
+from news.views import NewsList, PostAPIView, CategoryAPIView
 from django.views.decorators.cache import cache_page
 
 urlpatterns = [
@@ -11,5 +11,8 @@ urlpatterns = [
     path('', (NewsList.as_view()), name='news'),
     # path('', cache_page(60)(NewsList.as_view()), name='news'),
     path('sign/', include('sign.urls')),
-    path('', include('protect.urls'))
+    path('', include('protect.urls')),
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api/v1/postlist', PostAPIView.as_view()),
+    path('api/v1/categorylist', CategoryAPIView.as_view()),
 ]

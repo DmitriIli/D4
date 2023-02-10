@@ -1,4 +1,5 @@
 from datetime import timedelta
+from django.forms import model_to_dict
 
 from django.http import Http404, request
 from django.shortcuts import render, redirect
@@ -9,6 +10,12 @@ from .forms import CreatePost
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.core.cache import cache
+from rest_framework import viewsets,generics
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializers import *
+
 
 
 class NewsList(ListView):
@@ -149,3 +156,38 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
             return redirect('news')
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+
+# class PostViewset(viewsets.ModelViewSet):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+
+# class PostAPIView(generics.ListAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+
+class PostAPIView(APIView):
+    def get(self, request):
+        lst = Post.objects.all().values()
+        return Response({'posts': list(lst)})
+
+    
+    # def post(self, request):
+    #     post_new = Post.objects.create(
+    #         title = request.data['title'],
+    #         text = request.data['text'],
+            
+
+    #     )
+    #     return Response({'post': model_to_dict(post_new)})
+
+class CategoryAPIView(APIView):
+    def get(self, request):
+        lst = Category.objects.all().values()
+        return Response({'category':list(lst)})
+
+    def post(self, request):
+        category_new = Category.objects.create(
+            name = request.data['name']
+        )
+        return Response({'category': model_to_dict(category_new)})

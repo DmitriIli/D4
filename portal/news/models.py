@@ -45,7 +45,7 @@ class Subscribers(models.Model):
 class Post(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     type = models.CharField(max_length=2, default='AT')
-    date_time = models.DateTimeField(auto_now=True)
+    date_time = models.DateTimeField(auto_now_add=True)
     categories = models.ManyToManyField(Category, through='PostCategory')
     title = models.CharField(max_length=64, default=f'статья от {datetime.now()}')
     text = models.TextField(default='содердание статьи')
