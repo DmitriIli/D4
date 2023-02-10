@@ -10,6 +10,12 @@ from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.core.cache import cache
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.forms import model_to_dict
+
+from .serializers import CategorySerializers
+
 
 class NewsList(ListView):
     model = Post
@@ -149,3 +155,18 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
             return redirect('news')
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+
+class CategoryAPIView(APIView):
+    def get(self,request):
+        # cat = Category.objects.all().values()
+        cat = Category.objects.all()
+        return Response({'categories':CategorySerializers(cat, many=True).data})
+
+    def post(self, request):
+        serilizer = CategorySerializers(data=request.data)
+        serilizer.is_valid(raise_exception=True)
+        cat_new =  Category.objects.create(
+            name = request.data['name']
+        )
+        return Response({'category': CategorySerializers(cat_new).data})
