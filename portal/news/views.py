@@ -1,6 +1,5 @@
 from datetime import timedelta
 from django.forms import model_to_dict
-
 from django.http import Http404, request
 from django.shortcuts import render, redirect
 from .models import *
@@ -15,13 +14,10 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import *
-
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.forms import model_to_dict
+from rest_framework import status
 
-from .serializers import CategorySerializers
 
 
 class NewsList(ListView):
@@ -162,18 +158,31 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
             return redirect('news')
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
-
+   
 
 class CategoryAPIView(APIView):
     def get(self,request):
-        # cat = Category.objects.all().values()
+        
         cat = Category.objects.all()
         return Response({'categories':CategorySerializers(cat, many=True).data})
 
     def post(self, request):
         serilizer = CategorySerializers(data=request.data)
         serilizer.is_valid(raise_exception=True)
-        cat_new =  Category.objects.create(
-            name = request.data['name']
-        )
-        return Response({'category': CategorySerializers(cat_new).data})
+        # cat_new =  Category.objects.create(
+        #     name = request.data['name']
+        # )
+        # return Response({'category': CategorySerializers(cat_new).data})
+        serilizer.save()
+        return Response({'category': serilizer.data})
+
+    def put(sekf, request, *args, **kwargs):
+        pk = kwargs.get('pk', None)
+        
+
+
+    def delete(self, request, format=None,*args, **kwargs):
+        category = Category.objects.get(pk=kwargs.get('pk'))
+        # print(category.name)
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

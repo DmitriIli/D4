@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from news.views import NewsList, PostAPIView, CategoryAPIView
+from news.views import NewsList
 from django.views.decorators.cache import cache_page
 
 urlpatterns = [
