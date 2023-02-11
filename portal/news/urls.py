@@ -14,4 +14,5 @@ urlpatterns = [
     # path('articles/<int:pk>/', cache_page(300)(DetailNews.as_view()), name='detailArticle'),
     path('articles/<int:pk>/edit/', EditNews.as_view(), name='editArticle'),
     path('articles/<int:pk>/delete/', DeleteNews.as_view(), name='deleteArticle'),
-    ]
+    path('categorylist', CategoryAPIView.as_view())
+]

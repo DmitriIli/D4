@@ -12,7 +12,5 @@ urlpatterns = [
     # path('', cache_page(60)(NewsList.as_view()), name='news'),
     path('sign/', include('sign.urls')),
     path('', include('protect.urls')),
-    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    path('api/v1/postlist', PostAPIView.as_view()),
-    path('api/v1/categorylist', CategoryAPIView.as_view()),
+    path('api/v1/', include('news.urls'))
 ]

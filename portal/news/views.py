@@ -17,6 +17,12 @@ from rest_framework.views import APIView
 from .serializers import *
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.forms import model_to_dict
+
+from .serializers import CategorySerializers
+
 
 class NewsList(ListView):
     model = Post
@@ -158,36 +164,16 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
         return self.render_to_response(context)
 
 
-# class PostViewset(viewsets.ModelViewSet):
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer
-
-# class PostAPIView(generics.ListAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer
-
-class PostAPIView(APIView):
-    def get(self, request):
-        lst = Post.objects.all().values()
-        return Response({'posts': list(lst)})
-
-    
-    # def post(self, request):
-    #     post_new = Post.objects.create(
-    #         title = request.data['title'],
-    #         text = request.data['text'],
-            
-
-    #     )
-    #     return Response({'post': model_to_dict(post_new)})
-
 class CategoryAPIView(APIView):
-    def get(self, request):
-        lst = Category.objects.all().values()
-        return Response({'category':list(lst)})
+    def get(self,request):
+        # cat = Category.objects.all().values()
+        cat = Category.objects.all()
+        return Response({'categories':CategorySerializers(cat, many=True).data})
 
     def post(self, request):
-        category_new = Category.objects.create(
+        serilizer = CategorySerializers(data=request.data)
+        serilizer.is_valid(raise_exception=True)
+        cat_new =  Category.objects.create(
             name = request.data['name']
         )
-        return Response({'category': model_to_dict(category_new)})
+        return Response({'category': CategorySerializers(cat_new).data})
