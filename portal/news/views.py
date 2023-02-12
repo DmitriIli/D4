@@ -173,7 +173,7 @@ class CategoryAPIView(APIView):
         return Response({'categories':CategorySerializers(cat, many=True).data})
 
     def post(self, request):
-        serilizer = CategorySerializers(data=request.data)
+        serilizer = CategorySerializers(data=request.data) #переданы один аргумент, вызывается метод create класса CategorySerializers
         serilizer.is_valid(raise_exception=True)
         # cat_new =  Category.objects.create(
         #     name = request.data['name']
@@ -182,13 +182,28 @@ class CategoryAPIView(APIView):
         serilizer.save()
         return Response({'category': serilizer.data})
 
-    def put(sekf, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         pk = kwargs.get('pk', None)
+        if not pk:
+            return Response({'errore':'Method put is not allowed'})
+        try:
+            instance = Category.objects.get(pk=pk)
+        except:
+            return Response({'error':'Object does not exist'})
         
+        serializer = CategorySerializers(data = request.data, instance=instance) #переданы два аргумента, вызывается метод update класса CategorySerializers
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'data':serializer.data})
 
-
+  
     def delete(self, request, format=None,*args, **kwargs):
-        category = Category.objects.get(pk=kwargs.get('pk'))
-        # print(category.name)
-        category.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        pk = kwargs.get('pk', None)
+        if not pk:
+            return Response({'error':'Method delete is not allowed'})
+        try:
+            instance = Category.objects.get(pk=pk)
+        except:
+            return Response({'error':'object does not exist'})
+        instance.delete()
+        return Response({'post':'delete post '+str(pk)},status=status.HTTP_204_NO_CONTENT)

@@ -15,5 +15,6 @@ urlpatterns = [
     path('articles/<int:pk>/edit/', EditNews.as_view(), name='editArticle'),
     path('articles/<int:pk>/delete/', DeleteNews.as_view(), name='deleteArticle'),
     path('categorylist/', CategoryAPIView.as_view()),
+    path('categorylist/<int:pk>/', CategoryAPIView.as_view()),
     
 ]
