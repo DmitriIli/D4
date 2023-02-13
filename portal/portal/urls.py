@@ -12,5 +12,4 @@ urlpatterns = [
     # path('', cache_page(60)(NewsList.as_view()), name='news'),
     path('sign/', include('sign.urls')),
     path('', include('protect.urls')),
-    path('api/v1/', include('news.urls'))
 ]

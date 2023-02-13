@@ -6,7 +6,6 @@ from django.urls import reverse, reverse_lazy
 from django.core.cache import cache
 
 
-
 class Author(models.Model):
     author = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.SmallIntegerField(default=0)
@@ -22,7 +21,8 @@ class Author(models.Model):
         r_post = 0
         r_post += rating_post.get('post_rating')
 
-        rating_comment = self.author.comment_set.aggregate(comment_rating=Sum('rating'))
+        rating_comment = self.author.comment_set.aggregate(
+            comment_rating=Sum('rating'))
         r_comment = 0
         r_comment += rating_comment.get('comment_rating')
 
@@ -32,6 +32,7 @@ class Author(models.Model):
 
 class Category(models.Model):
     name = models.CharField(unique=True, max_length=64)
+    create_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -47,9 +48,13 @@ class Post(models.Model):
     type = models.CharField(max_length=2, default='AT')
     date_time = models.DateTimeField(auto_now_add=True)
     categories = models.ManyToManyField(Category, through='PostCategory')
-    title = models.CharField(max_length=64, default=f'статья от {datetime.now()}')
+    title = models.CharField(
+        max_length=64, default=f'статья от {datetime.now()}')
     text = models.TextField(default='содердание статьи')
     rating = models.SmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['-date_time']
 
     def __str__(self):
         return f'{self.title}:\n' \
@@ -69,13 +74,14 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return f'/news/{self.id}' if self.type == 'NW' else f'/aricles/{self.id}'
-           
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         cache.delete(f'post-{self.pk}')
 
     def clean(self) -> None:
         return super().clean()
+
 
 class PostCategory(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)

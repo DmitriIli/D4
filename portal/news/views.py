@@ -17,7 +17,7 @@ from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView, RetrieveUpdateDestroyAPIView
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -166,44 +166,62 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
         return self.render_to_response(context)
    
 
-class CategoryAPIView(APIView):
-    def get(self,request):
+# class CategoryAPIView(APIView):
+#     def get(self,request):
         
-        cat = Category.objects.all()
-        return Response({'categories':CategorySerializers(cat, many=True).data})
+#         cat = Category.objects.all()
+#         return Response({'categories':CategorySerializers(cat, many=True).data})
 
-    def post(self, request):
-        serilizer = CategorySerializers(data=request.data) #переданы один аргумент, вызывается метод create класса CategorySerializers
-        serilizer.is_valid(raise_exception=True)
-        # cat_new =  Category.objects.create(
-        #     name = request.data['name']
-        # )
-        # return Response({'category': CategorySerializers(cat_new).data})
-        serilizer.save()
-        return Response({'category': serilizer.data})
+#     def post(self, request):
+#         serilizer = CategorySerializers(data=request.data) #переданы один аргумент, вызывается метод create класса CategorySerializers
+#         serilizer.is_valid(raise_exception=True)
+#         # cat_new =  Category.objects.create(
+#         #     name = request.data['name']
+#         # )
+#         # return Response({'category': CategorySerializers(cat_new).data})
+#         serilizer.save()
+#         return Response({'category': serilizer.data})
 
-    def put(self, request, *args, **kwargs):
-        pk = kwargs.get('pk', None)
-        if not pk:
-            return Response({'errore':'Method put is not allowed'})
-        try:
-            instance = Category.objects.get(pk=pk)
-        except:
-            return Response({'error':'Object does not exist'})
+#     def put(self, request, *args, **kwargs):
+#         pk = kwargs.get('pk', None)
+#         if not pk:
+#             return Response({'errore':'Method put is not allowed'})
+#         try:
+#             instance = Category.objects.get(pk=pk)
+#         except:
+#             return Response({'error':'Object does not exist'})
         
-        serializer = CategorySerializers(data = request.data, instance=instance) #переданы два аргумента, вызывается метод update класса CategorySerializers
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'data':serializer.data})
+#         serializer = CategorySerializers(data = request.data, instance=instance) #переданы два аргумента, вызывается метод update класса CategorySerializers
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response({'data':serializer.data})
 
   
-    def delete(self, request, format=None,*args, **kwargs):
-        pk = kwargs.get('pk', None)
-        if not pk:
-            return Response({'error':'Method delete is not allowed'})
-        try:
-            instance = Category.objects.get(pk=pk)
-        except:
-            return Response({'error':'object does not exist'})
-        instance.delete()
-        return Response({'post':'delete post '+str(pk)},status=status.HTTP_204_NO_CONTENT)
+#     def delete(self, request, format=None,*args, **kwargs):
+#         pk = kwargs.get('pk', None)
+#         if not pk:
+#             return Response({'error':'Method delete is not allowed'})
+#         try:
+#             instance = Category.objects.get(pk=pk)
+#         except:
+#             return Response({'error':'object does not exist'})
+#         instance.delete()
+#         return Response({'post':'delete post '+str(pk)},status=status.HTTP_204_NO_CONTENT)
+
+
+### build-in view DRM ###
+# class CategoryAPIList(ListCreateAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategoryModelSerializers
+
+# class CategoryAPIView(UpdateAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategoryModelSerializers
+
+# class CategoriAPIDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategoryModelSerializers
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategoryModelSerializers
