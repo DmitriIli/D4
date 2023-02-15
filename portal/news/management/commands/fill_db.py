@@ -14,7 +14,7 @@ class Command(BaseCommand):
             'text': 'fish fish fish fish fish fish fish ',
         }
 
-        posts = [Post(title=f'Публикация {i}', **post_temlate, author=Author.objects.get(pk=1))
+        posts = [Post(title=f'Публикация {i}', **post_temlate, author=Author.objects.get(pk=random.randint(1,4)))
                  for i in range(1, 101)]
         Post.objects.bulk_create(posts)
 

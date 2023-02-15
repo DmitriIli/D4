@@ -5,7 +5,7 @@ import functools
 
 
 def query_debugger(func):
-    @function.wraps(func)
+    @functools.wraps(func)
     def inner_func(*args, **kwargs):
         reset_queries()
         start_queries = len(connection.queries)

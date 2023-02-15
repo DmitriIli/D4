@@ -9,17 +9,15 @@ from .forms import CreatePost
 from .filters import NewsFilter
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.core.cache import cache
-from rest_framework import viewsets,generics
+from rest_framework import viewsets, generics
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import *
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, RetrieveUpdateDestroyAPIView
-
-
-
-
+from rest_framework.pagination import PageNumberPagination
+from .utils import query_debugger
 
 
 class NewsList(ListView):
@@ -48,8 +46,6 @@ class NewsList(ListView):
         return context
 
 
-
-
 class DetailNews(DetailView):
     model = Post
     context_object_name = 'item'
@@ -57,23 +53,26 @@ class DetailNews(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        
+
         if self.request.user.is_authenticated:
-            context['user_is_author'] = True if self.get_object().author.author.id == self.request.user.id else False
+            context['user_is_author'] = True if self.get_object(
+            ).author.author.id == self.request.user.id else False
             user = self.request.user
             post = self.kwargs.get('pk')
-            category_list = [i.name for i in Post.objects.get(pk=post).categories.all()]
+            category_list = [i.name for i in Post.objects.get(
+                pk=post).categories.all()]
             user_category = User.objects.get(pk=user.id).subscribers_set.all()
             category_sub = [i.category.name for i in user_category]
-            context['category'] = list(set(category_list).difference(set(category_sub)))
+            context['category'] = list(
+                set(category_list).difference(set(category_sub)))
         return context
 
     def post(self, request, *args, **kwargs):
         user = request.user
         post = self.kwargs.get('pk')
         if user.is_authenticated:
-            category_list = [i.name for i in Post.objects.get(pk=post).categories.all()]
+            category_list = [i.name for i in Post.objects.get(
+                pk=post).categories.all()]
             user_category = User.objects.get(pk=user.id).subscribers_set.all()
             category_sub = [i.category.name for i in user_category]
             sub_cat = list(set(category_list).difference(set(category_sub)))
@@ -89,15 +88,15 @@ class DetailNews(DetailView):
                     break
         return redirect('/')
 
-    def get_object(self,*args, **kwargs) -> models.Model:
+    def get_object(self, *args, **kwargs) -> models.Model:
         obj = cache.get(f'post-{self.kwargs["pk"]}', None)
 
         if not obj:
-            obj =  super().get_object(queryset=self.queryset)
+            obj = super().get_object(queryset=self.queryset)
             cache.set(f'post-{self.kwargs["pk"]}', obj)
-        
+
         return obj
-    
+
     # def get(self, request, *args, **kwargs):
     #     try:
     #         self.object = self.get_object()
@@ -160,11 +159,11 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
             return redirect('news')
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
-   
+
 
 # class CategoryAPIView(APIView):
 #     def get(self,request):
-        
+
 #         cat = Category.objects.all()
 #         return Response({'categories':CategorySerializers(cat, many=True).data})
 
@@ -186,13 +185,13 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
 #             instance = Category.objects.get(pk=pk)
 #         except:
 #             return Response({'error':'Object does not exist'})
-        
+
 #         serializer = CategorySerializers(data = request.data, instance=instance) #переданы два аргумента, вызывается метод update класса CategorySerializers
 #         serializer.is_valid(raise_exception=True)
 #         serializer.save()
 #         return Response({'data':serializer.data})
 
-  
+
 #     def delete(self, request, format=None,*args, **kwargs):
 #         pk = kwargs.get('pk', None)
 #         if not pk:
@@ -218,13 +217,36 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
 #     queryset = Category.objects.all()
 #     serializer_class = CategoryModelSerializers
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostModelSerialisers
-
-    
+    pagination_class = StandardResultsSetPagination
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategoryModelSerializers
+
+@query_debugger
+def posts():
+    print('1')
+    # qs = Post.objects.all()
+    qs = Post.objects.select_related('author')
+    # qs = Post.objects.prefetch_related('author')
+    print(qs.query)
+    p = []
+    for item in qs:
+        p.append({
+            'author': item.author,
+            'title': item.title[:5],
+            'text': item.text[:10],
+            'categories':item.categories,
+        })
+    print(p)
+    return p
