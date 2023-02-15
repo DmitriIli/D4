@@ -9,7 +9,7 @@ def currency(value):
     value: значение, к которому нужно применить фильтр
     """
     # Возвращаемое функцией значение подставится в шаблон.
-    return f'{value}'[:-7]
+    return f'{value}'[:]
 
 
 @register.filter()
