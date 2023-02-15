@@ -14,16 +14,12 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import *
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, RetrieveUpdateDestroyAPIView
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.forms import model_to_dict
 
-from .serializers import CategorySerializers
+
+
 
 
 class NewsList(ListView):
@@ -221,6 +217,13 @@ class DeleteNews(PermissionRequiredMixin, DeleteView):
 # class CategoriAPIDetailView(RetrieveUpdateDestroyAPIView):
 #     queryset = Category.objects.all()
 #     serializer_class = CategoryModelSerializers
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostModelSerialisers
+
+    
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
