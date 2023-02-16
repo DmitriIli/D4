@@ -235,18 +235,26 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 @query_debugger
 def posts():
-    print('1')
     # qs = Post.objects.all()
-    qs = Post.objects.select_related('author')
-    # qs = Post.objects.prefetch_related('author')
+    # qs = Post.objects.all().select_related('author')
+    qs = (
+        Post.objects.select_related('author').values('title','author__author__username')
+        # Post.objects.all().select_related('author').prefetch_related('categories').values_list('title','author__author__username', 'categories')
+    )
+    # qs = Post.objects.prefetch_related('categories')
+    print('---------------------')
     print(qs.query)
+    print('---------------------')
     p = []
-    for item in qs:
-        p.append({
-            'author': item.author,
-            'title': item.title[:5],
-            'text': item.text[:10],
-            'categories':item.categories,
-        })
-    print(p)
+    # for item in qs.values:
+    #     p.append({
+    #         'author': item.author,
+    #         'title': item.title[:5],
+    #         # 'text': item.text[:10],
+    #         # 'categories':item.categories,
+    #     })
+    # print(p)
+    print('---------------------')
+    print(qs.values_list)
+    print('---------------------')
     return p
